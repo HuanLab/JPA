@@ -31,6 +31,10 @@ recommend using RStudio to complete the installation and usage of
 `ISFrag` by following the steps below:
 
 ``` r
+# Install "BiocManager" package from CRAN if you do not already have it installed.
+if (!requireNamespace("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+    
 # Install "devtools" package from CRAN if you do not already have it installed.
 if (!requireNamespace("devtools", quietly = TRUE)){
     install.packages("devtools")
