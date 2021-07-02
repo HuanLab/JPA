@@ -1,12 +1,12 @@
 IPA R Package User Manual
 ================
-Sam Shen, Jian Guo, Tao Huan
+Jian Guo, Sam Shen, Tao Huan
 07/04/2021
 
 -   [Part 1: Introduction and
     Installation](#part-1-introduction-and-installation)
--   [Part 2: MS1 level 1 & 2 Feature
-    Extraction](#part-2-ms1-level-1--2-feature-extraction)
+-   [Part 2: MS1 peak picking and MS2 recognition Feature
+    Extraction](#part-2-ms1-PP-and-MR-feature-extraction)
     -   [2.1 XCMS Feature Extraction](#21-xcms-feature-extraction)
     -   [2.2 Custom Featuretable Input](#22-custom-featuretable-input)
 -   [Part 3: Level 3 Feature
