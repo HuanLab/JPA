@@ -1,4 +1,4 @@
-IPA R Package User Manual
+JPA R Package User Manual
 ================
 Jian Guo, Sam Shen, Tao Huan
 07/04/2021
@@ -106,7 +106,7 @@ columns containing retention time information should be in seconds.
 
 ``` r
 # ft_directory specifies the directory of the custom csv file(s).
-FTdir = "X:/Users/Sam_Shen/IPAtest_20210330/multiDDA"
+FTdir = "X:/Users/JPAtest_20210330/multiDDA"
 # dir specifies the full directory of the folder containing mzXML file(s).
 dir = "X:/Users/JPAtest_20210330/multiDDA"
 
@@ -298,9 +298,9 @@ plot.features(dir = plotdir, featureTable = featureTable, data = MSdata, plot.ty
 
 # Part 8: CAMERA Annotation
 
-At the end of the IPA workflow, users can use CAMERA to identify adduct
+At the end of the JPA workflow, users can use CAMERA to identify adduct
 and isotope relationships in the feature table. Note: CAMERA annotation
-can ONLY be used for single-sample `IPA` analysis.
+can ONLY be used for single-sample `JPA` analysis.
 
 ``` r
 # Perform CAMERA annotation.
