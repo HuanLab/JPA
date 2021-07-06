@@ -298,7 +298,7 @@ plot.features(dir = plotdir, featureTable = featureTable, data = MSdata, plot.ty
 
 # Part 8: CAMERA Annotation
 
-At the end of the JPA workflow, users can use CAMERA to identify adduct
+Additionally, before the alignment, users can use CAMERA to identify adduct
 and isotope relationships in the feature table. Note: CAMERA annotation
 can ONLY be used for single-sample `JPA` analysis.
 
