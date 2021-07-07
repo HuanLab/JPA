@@ -304,7 +304,7 @@ can ONLY be used for single-sample `JPA` analysis.
 
 ``` r
 # Perform CAMERA annotation.
-featureTable <- adduct.isotope.annotation(featureTable = featureTable, data = MSdata, polarity = "negative")
+featureTable <- adduct.isotope.annotation(data = MSdata, polarity = "negative")
 ```
 
 # Part 9: Additional Details and Notes
