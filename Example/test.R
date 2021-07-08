@@ -34,6 +34,7 @@ featureTable <- XCMS.featureTable(dir = dir, mz.tol = 10, ppm=10, peakwidth=c(5,
                              snthresh = 6, integrate = 1, prefilter = c(3,100), noise = 100)
 featureTable <- find.level3features(data = MSdata)
 featureTable <- find.targetfeatures(data = MSdata, tarFTdir = tarFTdir, tarFTname = tarFTname)
+featureTable <- adduct.isotope.annotation(data = MSdata, polarity = "negative")
 featureTable <- peak.alignment(data = MSdata, bw = 5, minfrac = 0.5, mzwid = 0.015,
                                minsamp = 1, max = 100, quantitative.method = "maxo")
 #########################################################################################
@@ -83,7 +84,7 @@ plot.features(dir = plotdir, featureTable = featureTable, data = MSdata, plot.ty
 # only for multi-sample analysis
 plot.features(dir = plotdir, featureTable = featureTable, data = MSdata, plot.type = "multi", smooth = 2)
 
-lib_directory <- "E:/SAM"
+lib_directory <- "X:/Users/Sam_Shen/Library"
 lib_name <- "convertedLibraryNeg.msp"
 featureTable <- ms2.tofeaturetable(data = MSdata, featureTable = featureTable)
 featureTable <- feature.annotation(featureTable = featureTable, lib_directory = lib_directory, lib_name = lib_name, dp = 0.1)
