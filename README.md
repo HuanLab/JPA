@@ -306,5 +306,9 @@ can ONLY be used for single-sample `JPA` analysis.
 # Perform CAMERA annotation.
 featureTable <- adduct.isotope.annotation(data = MSdata, polarity = "negative")
 ```
+After you ran the CAMERA annotation, you can perform the alignment function. Several (2+number of samples) new columns will be generated in the aligned feature table with names
+"isotope", "adducts", and the names of each sample file. The "isotope" column contains a value (0~1) representing the percentage of samples within which the feature is
+annotated as an isotopic feature. Each of the new column with sample name represents the PC group of this feature in the corresponding sample file. The annotated isotopic
+features are not removed.
 
 # Part 9: Additional Details and Notes
