@@ -710,7 +710,6 @@ adduct.isotope.annotation <- function(data, polarity){
     #clean up the cluster
     stopImplicitCluster()
 
-  }
 
   featureTable <- as.data.frame(featureTable)
   userFT <- featureTable
@@ -748,7 +747,7 @@ adduct.isotope.annotation <- function(data, polarity){
   userFT$level[userFT$level == 4] <- "target"
 
   return(userFT)
-
+  }
 }
 
 #Performs feature alignment for multi-sample analysis
