@@ -140,6 +140,7 @@ head(featureTable)
 
 # Part 3: MS2 recognition Feature Identification
 
+Please do not use this function when processing full-scan or DIA data set!
 After PP features have been extracted, MR feature
 identification can be performed. This step is optional.
 
