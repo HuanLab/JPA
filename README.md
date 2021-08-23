@@ -103,7 +103,7 @@ acceptable. All CSV file(s) of interest need to be placed in a separate
 folder containing no other irrelevant CSV files. Note: column 3 and
 column 4 are the retention time of the feature edges, and all three
 columns containing retention time information should be in seconds. 
-An R code (csvconvert) is provided to help user transform the csv form MS-DIAL to the format recognizable by JPA.
+An R code (convertCSV.R) is provided to help user transform the csv form MS-DIAL to the format recognizable by JPA.
 For other types of input, user can easily tune the code to adapt to converting different formats of csv files.
 
 ``` r
