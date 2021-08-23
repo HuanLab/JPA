@@ -102,7 +102,8 @@ single mzXML file to be analyzed. Aligned feature table is not
 acceptable. All CSV file(s) of interest need to be placed in a separate
 folder containing no other irrelevant CSV files. Note: column 3 and
 column 4 are the retention time of the feature edges, and all three
-columns containing retention time information should be in seconds.
+columns containing retention time information should be in seconds. 
+An R code (csvtransform) is provided to help user transform the csv form MS-DIAL to the format recognizable by JPA.
 
 ``` r
 # ft_directory specifies the directory of the custom csv file(s).
