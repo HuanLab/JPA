@@ -162,7 +162,7 @@ features, they will not be added. Otherwise, these features will be
 explored from the raw data and added to the feature table with “target”
 as their level if exist. The in-house metabolites library must be in CSV
 format with ONLY the columns “mz” and “rt” in order. This step is
-optional.
+optional. The threshold used for determining whether the rescued targeted features are true positive can be estimated by using the R code "thresholdEstimate.R" provided on the GitHub.
 
 ``` r
 # Directory containing the in-house standard metabolite library.
@@ -185,7 +185,7 @@ head(read.csv(tarFTname, header = T, stringsAsFactors = F))
 
 ``` r
 # Extract target feature and add them to the original featuretable if they do no exist already.
-featureTable <- find.targetfeatures(data = MSdata, tarFTdir = tarFTdir, tarFTname = tarFTname)
+featureTable <- find.targetfeatures(data = MSdata, tarFTdir = tarFTdir, tarFTname = tarFTname, target.threshold = 2)
 # Target features that are newly added.
 head(featureTable[featureTable$level == "target",])
 ```
