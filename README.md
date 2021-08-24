@@ -144,11 +144,12 @@ head(featureTable)
 
 Please do not use this function when processing full-scan or DIA data set!
 After PP features have been extracted, MR feature
-identification can be performed. This step is optional.
+identification can be performed. This step is optional. 
+The threshold used for determining whether the rescued features are true positive can be estimated by using the R code "thresholdEstimate.R" provided on the GitHub.
 
 ``` r
 # Find MR features and add them to the original feature table.
-featureTable <- find.level3features(data = MSdata)
+featureTable <- find.level3features(data = MSdata, level3.threshold = 2)
 ```
 
 # Part 4: Add Target Features
