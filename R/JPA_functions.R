@@ -10,12 +10,12 @@ matchMS2 <- function(x,featuretable, rt.tol = 0, mz.tol = 0) {
   colnames(pks)[ncol(pks)] <- "mzmin"
   pks <- cbind(pks, 0)
   colnames(pks)[ncol(pks)] <- "mzmax"
-
+  
   pks[, "mzmin"] <- pks[, "mz"] - mz.tol
   pks[, "mzmax"] <- pks[, "mz"] + mz.tol
   pks[, "rtmin"] <- pks[, "rt"] - rt.tol
   pks[, "rtmax"] <- pks[, "rt"] + rt.tol
-
+  
   peak_ids <- rownames(pks)
   sps <- spectra(x)
   pmz <- precursorMz(x)
@@ -37,7 +37,7 @@ matchMS2 <- function(x,featuretable, rt.tol = 0, mz.tol = 0) {
 
 #XCMS Feature Extraction
 XCMS.featureTable <- function(dir, mz.tol = 10, ppm=10, peakwidth=c(5,20), mzdiff = 0.01, snthresh = 6, integrate = 1,
-                         prefilter = c(3,100), noise = 100){
+                              prefilter = c(3,100), noise = 100){
   #XCMS feature detection
   cwp <- CentWaveParam(ppm = ppm,
                        peakwidth = peakwidth,
@@ -46,14 +46,14 @@ XCMS.featureTable <- function(dir, mz.tol = 10, ppm=10, peakwidth=c(5,20), mzdif
                        integrate = integrate,
                        prefilter = prefilter,
                        noise = noise)
-
+  
   # Calculate the number of cores
   no_cores <- detectCores() - 1
   # print("Using cores:")
   # print(no_cores)
   # Initiate cluster
   registerDoParallel(no_cores)
-
+  
   setwd(dir)
   input.files <- list.files(pattern = ".mzXML")
   data <- readMSData(input.files, centroided = TRUE, mode = "onDisk")
@@ -62,13 +62,13 @@ XCMS.featureTable <- function(dir, mz.tol = 10, ppm=10, peakwidth=c(5,20), mzdif
   featureTable <- as.data.frame(chromPeaks(data))
   featureTable <- cbind(featureTable, 2)
   colnames(featureTable)[ncol(featureTable)] <- "level"
-
+  
   if(length(input.files) == 1){
     #Label Level 1,2 features
     premass.matrix <- data@featureData@data[data@featureData@data$msLevel == 2 &
                                               data@featureData@data$basePeakIntensity > 0,c(10, 18, 20)]
     colnames(premass.matrix) <- c("rt", "mz", "int")
-
+    
     is.level12 <- logical(length = nrow(premass.matrix))
     for(i in 1:nrow(premass.matrix)){
       mass.lower.limit <- premass.matrix$mz[i] * (1 - mz.tol * 1e-6)
@@ -85,7 +85,7 @@ XCMS.featureTable <- function(dir, mz.tol = 10, ppm=10, peakwidth=c(5,20), mzdif
     }
   }else{
     width <- floor(log10(length(input.files))) + 1
-
+    
     #Label Level 1,2 features
     label12 <- foreach(n = 1:length(input.files)) %dopar% {
       currFeatureTable <- featureTable[featureTable$sample == n,]
@@ -113,13 +113,13 @@ XCMS.featureTable <- function(dir, mz.tol = 10, ppm=10, peakwidth=c(5,20), mzdif
       }
       return(currFeatureTable)
     }
-
+    
     featureTable <- as.data.frame(bind_rows(label12))
   }
-
+  
   #clean up the cluster
   stopImplicitCluster()
-
+  
   featureTable <- as.data.frame(featureTable)
   featureTable <- featureTable[order(featureTable$mz, decreasing = F ),]
   digits <- floor(log10(nrow(featureTable))) + 1
@@ -139,7 +139,7 @@ custom.featureTable <- function(dir, FTdir, mz.tol = 10){
   # print(no_cores)
   # Initiate cluster
   registerDoParallel(no_cores)
-
+  
   setwd(dir)
   cwp <- CentWaveParam(ppm = 10,
                        peakwidth = c(5,20),
@@ -152,7 +152,7 @@ custom.featureTable <- function(dir, FTdir, mz.tol = 10){
   data <- readMSData(input.files, centroided = TRUE, mode = "onDisk")
   #PICK LEVEL 1 AND 2 FEATURES
   data <- findChromPeaks(data, param = cwp)
-
+  
   setwd(FTdir)
   input.csv <- list.files(pattern = ".csv")
   samp1 <- read.csv(file = input.csv[1], header = T, stringsAsFactors = F)
@@ -169,7 +169,7 @@ custom.featureTable <- function(dir, FTdir, mz.tol = 10){
   featureTable$maxo <- samp1[,5]
   featureTable$sn <- 0
   featureTable$sample <- 1
-
+  
   if(length(input.csv) > 1){
     for(i in 1:length(input.csv)){
       addFT <- read.csv(file = input.csv[i], header = T, stringsAsFactors = F)
@@ -189,7 +189,7 @@ custom.featureTable <- function(dir, FTdir, mz.tol = 10){
       featureTable <- rbind(featureTable, newFT)
     }
   }
-
+  
   featureTable <- as.data.frame(featureTable)
   featureTable <- featureTable[order(featureTable$mz, decreasing = F ),]
   digits <- floor(log10(nrow(featureTable))) + 1
@@ -197,13 +197,13 @@ custom.featureTable <- function(dir, FTdir, mz.tol = 10){
   chromPeaks(data) <- as.matrix(featureTable)
   featureTable <- cbind(featureTable, 2)
   colnames(featureTable)[ncol(featureTable)] <- "level"
-
+  
   if(length(input.files) == 1){
     #Label Level 1,2 features
     premass.matrix <- data@featureData@data[data@featureData@data$msLevel == 2 &
                                               data@featureData@data$basePeakIntensity > 0,c(10, 18, 20)]
     colnames(premass.matrix) <- c("rt", "mz", "int")
-
+    
     is.level12 <- logical(length = nrow(premass.matrix))
     for(i in 1:nrow(premass.matrix)){
       mass.lower.limit <- premass.matrix$mz[i] * (1 - mz.tol * 1e-6)
@@ -220,7 +220,7 @@ custom.featureTable <- function(dir, FTdir, mz.tol = 10){
     }
   }else{
     width <- floor(log10(length(input.files))) + 1
-
+    
     #Label Level 1,2 features
     label12 <- foreach(n = 1:length(input.files)) %dopar% {
       currFeatureTable <- featureTable[featureTable$sample == n,]
@@ -248,13 +248,13 @@ custom.featureTable <- function(dir, FTdir, mz.tol = 10){
       }
       return(currFeatureTable)
     }
-
+    
     featureTable <- as.data.frame(bind_rows(label12))
   }
-
+  
   #clean up the cluster
   stopImplicitCluster()
-
+  
   featureTable <- as.data.frame(featureTable)
   featureTable <- featureTable[order(featureTable$mz, decreasing = F ),]
   digits <- floor(log10(nrow(featureTable))) + 1
@@ -267,24 +267,24 @@ custom.featureTable <- function(dir, FTdir, mz.tol = 10){
 }
 
 #Add additional level 3 features to featureTable
-find.level3features <- function(data, mz.tol = 10, mass.tol = 0.05, rt.tol = 60,
+find.level3features <- function(data, mz.tol = 10, mass.tol = 0.05, rt.tol = 60, derep.mass.tol = 0.01, derep.rt.tol = 30
                                 level3.threshold = 2){
-
+  
   # Calculate the number of cores
   no_cores <- detectCores() - 1
   # print("Using cores:")
   # print(no_cores)
   # Initiate cluster
   registerDoParallel(no_cores)
-
+  
   input.files <- gsub("\\", "/", data@processingData@files, fixed=TRUE)
-
+  
   if(length(input.files) == 1){
     #Label Level 1,2 features
     premass.matrix <- data@featureData@data[data@featureData@data$msLevel == 2 &
                                               data@featureData@data$basePeakIntensity > 0,c(10, 18, 20)]
     colnames(premass.matrix) <- c("rt", "mz", "int")
-
+    
     is.level12 <- logical(length = nrow(premass.matrix))
     for(i in 1:nrow(premass.matrix)){
       mass.lower.limit <- premass.matrix$mz[i] * (1 - mz.tol * 1e-6)
@@ -297,7 +297,7 @@ find.level3features <- function(data, mz.tol = 10, mass.tol = 0.05, rt.tol = 60,
       }
     }
     xraw <- xcmsRaw(input.files[1],profstep=0, mslevel = 1)
-
+    
     # Confirm level 3 features
     putative.level3 <- premass.matrix[is.level12 == FALSE,]
     level3.matrix <- data.frame(matrix(nrow = nrow(putative.level3), ncol = ncol(tmpFT)))
@@ -310,7 +310,7 @@ find.level3features <- function(data, mz.tol = 10, mass.tol = 0.05, rt.tol = 60,
         rt.upper.limit <- putative.level3$rt[j] + rt.tol
         mass.lower.limit <- putative.level3$mz[j] - mass.tol
         mass.upper.limit <- putative.level3$mz[j] + mass.tol
-
+        
         mzRange <- as.double(cbind(mass.lower.limit, mass.upper.limit))
         RTRange <- as.integer(cbind(rt.lower.limit, rt.upper.limit))
         eeic <- rawEIC(xraw, mzrange=mzRange, rtrange=RTRange)
@@ -334,15 +334,15 @@ find.level3features <- function(data, mz.tol = 10, mass.tol = 0.05, rt.tol = 60,
         }
       }
       level3.matrix <- level3.matrix[is.na(level3.matrix$mz)==FALSE,]
-
+      
       # Dereplication of level 3 features
       dereplicate.level3 <- data.frame(matrix(ncol = ncol(level3.matrix), nrow = 1))
       colnames(dereplicate.level3) <- colnames(level3.matrix)
       for(q in 1:nrow(level3.matrix)){
-        mass.lower.limit <- level3.matrix$mz[q] - 0.01
-        mass.upper.limit <- level3.matrix$mz[q] + 0.01
-        rt.lower.limit <- level3.matrix$rt[q] - 30
-        rt.upper.limit <- level3.matrix$rt[q] + 30
+        mass.lower.limit <- level3.matrix$mz[q] - derep.mass.tol
+        mass.upper.limit <- level3.matrix$mz[q] + derep.mass.tol
+        rt.lower.limit <- level3.matrix$rt[q] - derep.rt.tol
+        rt.upper.limit <- level3.matrix$rt[q] + derep.rt.tol
         temp <- dereplicate.level3[(dereplicate.level3$mz >= mass.lower.limit &
                                       dereplicate.level3$mz <= mass.upper.limit &
                                       dereplicate.level3$rt >= rt.lower.limit &
@@ -354,11 +354,11 @@ find.level3features <- function(data, mz.tol = 10, mass.tol = 0.05, rt.tol = 60,
       }
       dereplicate.level3 <- dereplicate.level3[complete.cases(dereplicate.level3),]
     }
-
+    
   }else{
     width <- floor(log10(length(input.files))) + 1
     featureT <- as.data.frame(chromPeaks(data))
-
+    
     label12 <- foreach(n = 1:length(input.files), .packages = c("xcms", "dplyr")) %dopar% {
       currFeatureTable <- chromPeaks(data)[chromPeaks(data)[,11] == n,]
       premass.matrix <- data@featureData@data[data@featureData@data$msLevel == 2 &
@@ -384,12 +384,12 @@ find.level3features <- function(data, mz.tol = 10, mass.tol = 0.05, rt.tol = 60,
     }
     is.level12List <- list()
     premass.matrixList <- list()
-
+    
     for(n in 1:length(input.files)){
       is.level12List[[n]] <- label12[[n]][[1]]
       premass.matrixList[[n]] <- label12[[n]][[2]]
     }
-
+    
     #PICK LEVEL 3 FEATURES AND ADD TO XCMS RESULTS
     level3List <- foreach(n = (1:length(input.files)), .packages = c("xcms", "dplyr")) %dopar% {
       # Find potential level 3 features
@@ -402,7 +402,7 @@ find.level3features <- function(data, mz.tol = 10, mass.tol = 0.05, rt.tol = 60,
       is.level3 <- logical(length = nrow(putative.level3))
       level3.matrix <- data.frame(matrix(nrow = nrow(putative.level3), ncol = ncol(chromPeaks(data))))
       colnames(level3.matrix) <- colnames(chromPeaks(data))
-
+      
       for (j in 1:nrow(putative.level3)){
         if(putative.level3$mz[j] > xraw@mzrange[2] | putative.level3$mz[j] < xraw@mzrange[1]) next
         if(putative.level3$rt[j] > tail(xraw@scantime, n=1) | putative.level3$rt[j] < xraw@scantime[1]) next
@@ -410,7 +410,7 @@ find.level3features <- function(data, mz.tol = 10, mass.tol = 0.05, rt.tol = 60,
         mass.upper.limit <- putative.level3$mz[j] + mass.tol
         rt.lower.limit <- putative.level3$rt[j] - rt.tol
         rt.upper.limit <- putative.level3$rt[j] + rt.tol
-
+        
         mzRange <- as.double(cbind(mass.lower.limit, mass.upper.limit))
         RTRange <- as.integer(cbind(rt.lower.limit, rt.upper.limit))
         eeic <- rawEIC(xraw, mzrange=mzRange, rtrange=RTRange)
@@ -435,15 +435,15 @@ find.level3features <- function(data, mz.tol = 10, mass.tol = 0.05, rt.tol = 60,
         }
       }
       level3.matrix <- level3.matrix[is.na(level3.matrix$mz)==FALSE,]
-
+      
       # Dereplication of level 3 features
       dereplicate.level3 <- data.frame(matrix(ncol = ncol(level3.matrix), nrow = 1))
       colnames(dereplicate.level3) <- colnames(level3.matrix)
       for(q in 1:nrow(level3.matrix)){
-        mass.lower.limit <- level3.matrix$mz[q] - 0.01
-        mass.upper.limit <- level3.matrix$mz[q] + 0.01
-        rt.lower.limit <- level3.matrix$rt[q] - 30
-        rt.upper.limit <- level3.matrix$rt[q] + 30
+        mass.lower.limit <- level3.matrix$mz[q] - derep.mass.tol
+        mass.upper.limit <- level3.matrix$mz[q] + derep.mass.tol
+        rt.lower.limit <- level3.matrix$rt[q] - derep.rt.tol
+        rt.upper.limit <- level3.matrix$rt[q] + derep.rt.tol
         temp <- dereplicate.level3[(dereplicate.level3$mz >= mass.lower.limit &
                                       dereplicate.level3$mz <= mass.upper.limit &
                                       dereplicate.level3$rt >= rt.lower.limit &
@@ -458,10 +458,10 @@ find.level3features <- function(data, mz.tol = 10, mass.tol = 0.05, rt.tol = 60,
     }
     dereplicate.level3 <- as.data.frame(bind_rows(level3List))
   }
-
+  
   #clean up the cluster
   stopImplicitCluster()
-
+  
   featureTable <- rbind(chromPeaks(data), as.matrix(dereplicate.level3))
   featureTable <- as.data.frame(featureTable)
   featureTable <- featureTable[order(featureTable$mz, decreasing = F ),]
@@ -482,17 +482,17 @@ find.targetfeatures <- function(data, tarFTdir, tarFTname, mass.tol = 0.01, rt.t
   # print(no_cores)
   # Initiate cluster
   registerDoParallel(no_cores)
-
+  
   input.files <- gsub("\\", "/", data@processingData@files, fixed=TRUE)
   featureTable <- as.data.frame(chromPeaks(data))
-
+  
   setwd(tarFTdir)
   input <- read.csv(file = tarFTname, header = T, stringsAsFactors = F)
   addFT <- data.frame(matrix(ncol = ncol(featureTable), nrow = nrow(input)))
   colnames(addFT) <- colnames(featureTable)
   addFT$mz <- input[,1]
   addFT$rt <- input[,2]
-
+  
   if(length(input.files) == 1){
     xraw <- xcmsRaw(input.files[1],profstep=0, mslevel = 1)
     for(i in 1:nrow(addFT)){
@@ -505,7 +505,7 @@ find.targetfeatures <- function(data, tarFTdir, tarFTname, mass.tol = 0.01, rt.t
       if(nrow(temp) != 0) next
       if(addFT$mz[i] > xraw@mzrange[2] | addFT$mz[i] < xraw@mzrange[1]) next
       if(addFT$rt[i] > tail(xraw@scantime, n=1) | addFT$rt[i] < xraw@scantime[1]) next
-
+      
       mzRange <- as.double(cbind(mass.lower.limit, mass.upper.limit))
       RTRange <- as.integer(cbind(rt.lower.limit, rt.upper.limit))
       eeic <- rawEIC(xraw, mzrange=mzRange, rtrange=RTRange)
@@ -514,7 +514,7 @@ find.targetfeatures <- function(data, tarFTdir, tarFTname, mass.tol = 0.01, rt.t
       if(is.na(max.int) | max.int == 0) next
       avg.int <- (sum(eic.matrix) - max.int) / (length(eic.matrix) - 1)
       if(max.int >= target.threshold * avg.int){
-
+        
         addFT[i,1]  <- addFT$mz[i]
         addFT[i,2]  <- addFT$mz[i]
         addFT[i,3]  <- addFT$mz[i]
@@ -531,7 +531,7 @@ find.targetfeatures <- function(data, tarFTdir, tarFTname, mass.tol = 0.01, rt.t
       }
     }
     featureTable <- featureTable[complete.cases(featureTable),]
-
+    
     # dereplicatedFT <- data.frame(matrix(ncol = ncol(featureTable), nrow = 0)) #generate data frame with dereplicated features
     # colnames(dereplicatedFT) <- colnames(featureTable)
     # for(m in (1:nrow(featureTable))) {
@@ -550,9 +550,9 @@ find.targetfeatures <- function(data, tarFTdir, tarFTname, mass.tol = 0.01, rt.t
     #     }
     #   }
     # }
-
+    
   }else{
-
+    
     newFTlist <- foreach(n = (1:length(input.files)), .packages = c("xcms", "dplyr")) %dopar% {
       FT <- featureTable[featureTable$sample == n, ]
       xraw <- xcmsRaw(input.files[n],profstep=0, mslevel = 1)
@@ -566,7 +566,7 @@ find.targetfeatures <- function(data, tarFTdir, tarFTname, mass.tol = 0.01, rt.t
         if(nrow(temp) != 0) next
         if(addFT$mz[i] > xraw@mzrange[2] | addFT$mz[i] < xraw@mzrange[1]) next
         if(addFT$rt[i] > tail(xraw@scantime, n=1) | addFT$rt[i] < xraw@scantime[1]) next
-
+        
         mzRange <- as.double(cbind(mass.lower.limit, mass.upper.limit))
         RTRange <- as.integer(cbind(rt.lower.limit, rt.upper.limit))
         eeic <- rawEIC(xraw, mzrange=mzRange, rtrange=RTRange)
@@ -575,7 +575,7 @@ find.targetfeatures <- function(data, tarFTdir, tarFTname, mass.tol = 0.01, rt.t
         if(is.na(max.int) | max.int == 0) next
         avg.int <- (sum(eic.matrix) - max.int) / (length(eic.matrix) - 1)
         if(max.int >= target.threshold * avg.int){
-
+          
           addFT[i,1]  <- addFT$mz[i]
           addFT[i,2]  <- addFT$mz[i]
           addFT[i,3]  <- addFT$mz[i]
@@ -617,10 +617,10 @@ find.targetfeatures <- function(data, tarFTdir, tarFTname, mass.tol = 0.01, rt.t
     }
     featureTable <- as.data.frame(bind_rows(newFTlist))
   }
-
+  
   #clean up the cluster
   stopImplicitCluster()
-
+  
   featureTable <- as.data.frame(featureTable)
   featureTable <- featureTable[order(featureTable$mz, decreasing = F ),]
   digits <- floor(log10(nrow(featureTable))) + 1
@@ -639,7 +639,7 @@ adduct.isotope.annotation <- function(data, polarity){
   featureTable <- as.data.frame(chromPeaks(data))
   featureTable$level[featureTable$level == "target"] <- 4
   featureTable$level <- as.numeric(featureTable$level)
-
+  
   if(length(input.files) == 1){
     data_filtered <- filterMsLevel(data, msLevel = 1L)
     xset <- as(data_filtered, 'xcmsSet')
@@ -656,7 +656,7 @@ adduct.isotope.annotation <- function(data, polarity){
     colnames(featureTable)[ncol(featureTable)] <- "Adduct"
     featureTable <- cbind(featureTable, as.numeric(peaklist$pcgroup))
     colnames(featureTable)[ncol(featureTable)] <- "pcgroup"
-
+    
   }else{
     # Calculate the number of cores
     no_cores <- detectCores() - 1
@@ -664,7 +664,7 @@ adduct.isotope.annotation <- function(data, polarity){
     # print(no_cores)
     # Initiate cluster
     registerDoParallel(no_cores)
-
+    
     newFTlist <- foreach(n = (1:length(input.files)), .packages = c("xcms", "CAMERA")) %dopar% {
       FT <- featureTable[featureTable$sample == n, ]
       currData <- readMSData(input.files[n], centroided = TRUE, mode = "onDisk")
@@ -677,13 +677,13 @@ adduct.isotope.annotation <- function(data, polarity){
                            prefilter = c(3,100),
                            noise = 100)
       currData <- findChromPeaks(currData, param = cwp)
-
+      
       FT <- FT[order(FT$mz, decreasing = F ),]
       digits <- floor(log10(nrow(FT))) + 1
       rownames(FT) <- paste0("CP", sprintf(paste0("%0", digits, "d"), c(1:nrow(FT))))
       FT$sample <- 1
       chromPeaks(currData) <- as.matrix(FT)
-
+      
       data_filtered <- filterMsLevel(currData, msLevel = 1L)
       xset <- as(data_filtered, 'xcmsSet')
       xsa <- xsAnnotate(xset)
@@ -693,7 +693,7 @@ adduct.isotope.annotation <- function(data, polarity){
       anFA <- findAdducts(anIC, polarity=polarity)
       peaklist <- getPeaklist(anFA)
       peaklist <- peaklist[order(peaklist$mz),]
-
+      
       FT <- cbind(FT, peaklist$isotopes)
       colnames(FT)[ncol(FT)] <- "isotopes"
       FT <- cbind(FT, peaklist$adduct)
@@ -701,52 +701,52 @@ adduct.isotope.annotation <- function(data, polarity){
       FT <- cbind(FT, as.numeric(peaklist$pcgroup))
       colnames(FT)[ncol(FT)] <- "pcgroup"
       FT$sample <- n
-
+      
       # FT <- FT[complete.cases(FT),]
       return(FT)
     }
     featureTable <- as.data.frame(bind_rows(newFTlist))
-
+    
     #clean up the cluster
     stopImplicitCluster()
-
-
-  featureTable <- as.data.frame(featureTable)
-  userFT <- featureTable
-
-  if(polarity == "positive"){
-    logicalISP <- grepl("[M]+", featureTable$isotopes, fixed = T)
-  }else{
-    logicalISP <- grepl("[M]-", featureTable$isotopes, fixed = T)
-  }
-
-  featureTable$isotopes[featureTable$isotopes == "" | logicalISP] <- 8
-  featureTable$isotopes[featureTable$isotopes != 8 ] <- 0
-  featureTable$isotopes <- as.numeric(featureTable$isotopes)
-
-  if(polarity == "positive"){
-    logicalADD <- grepl("[M+H]+", featureTable$adduct, fixed = T)
-  }else{
-    logicalADD <- grepl("[M-H]-", featureTable$adduct, fixed = T)
-  }
-
-  featureTable$adduct[featureTable$adduct == "" | logicalADD] <- 8
-  featureTable$adduct[featureTable$adduct != 8 ] <- 0
-  featureTable$adduct <- as.numeric(featureTable$adduct)
-
-  featureTable <- featureTable[order(featureTable$mz, decreasing = F ),]
-  digits <- floor(log10(nrow(featureTable))) + 1
-  rownames(featureTable) <- paste0("CP", sprintf(paste0("%0", digits, "d"), c(1:nrow(featureTable))))
-  chromPeaks(data) <- as.matrix(featureTable)
-  MSdata <<- data
-
-  userFT <- userFT[order(userFT$mz, decreasing = F ),]
-  rownames(userFT) <- paste("F", 1:nrow(userFT), sep="")
-  userFT <- userFT[, c("mz", "rt", "rtmin", "rtmax", "maxo", "sample", "level",
-                                   "isotopes", "adduct", "pcgroup")]
-  userFT$level[userFT$level == 4] <- "target"
-
-  return(userFT)
+    
+    
+    featureTable <- as.data.frame(featureTable)
+    userFT <- featureTable
+    
+    if(polarity == "positive"){
+      logicalISP <- grepl("[M]+", featureTable$isotopes, fixed = T)
+    }else{
+      logicalISP <- grepl("[M]-", featureTable$isotopes, fixed = T)
+    }
+    
+    featureTable$isotopes[featureTable$isotopes == "" | logicalISP] <- 8
+    featureTable$isotopes[featureTable$isotopes != 8 ] <- 0
+    featureTable$isotopes <- as.numeric(featureTable$isotopes)
+    
+    if(polarity == "positive"){
+      logicalADD <- grepl("[M+H]+", featureTable$adduct, fixed = T)
+    }else{
+      logicalADD <- grepl("[M-H]-", featureTable$adduct, fixed = T)
+    }
+    
+    featureTable$adduct[featureTable$adduct == "" | logicalADD] <- 8
+    featureTable$adduct[featureTable$adduct != 8 ] <- 0
+    featureTable$adduct <- as.numeric(featureTable$adduct)
+    
+    featureTable <- featureTable[order(featureTable$mz, decreasing = F ),]
+    digits <- floor(log10(nrow(featureTable))) + 1
+    rownames(featureTable) <- paste0("CP", sprintf(paste0("%0", digits, "d"), c(1:nrow(featureTable))))
+    chromPeaks(data) <- as.matrix(featureTable)
+    MSdata <<- data
+    
+    userFT <- userFT[order(userFT$mz, decreasing = F ),]
+    rownames(userFT) <- paste("F", 1:nrow(userFT), sep="")
+    userFT <- userFT[, c("mz", "rt", "rtmin", "rtmax", "maxo", "sample", "level",
+                         "isotopes", "adduct", "pcgroup")]
+    userFT$level[userFT$level == 4] <- "target"
+    
+    return(userFT)
   }
 }
 
@@ -759,12 +759,12 @@ peak.alignment <- function(data, bw = 5, minfrac = 0.5, mzwid = 0.015,
   data <- groupChromPeaks(data, param = groupParam)
   # data <- adjustRtime(data, param = ObiwarpParam(binSize = 1))
   data <- adjustRtime(data, param = PeakGroupsParam(minFraction = 1))
-
+  
   data <- groupChromPeaks(data, param = groupParam)
   data <- fillChromPeaks(data, param = FillChromPeaksParam())
   XCMI <- as.data.frame(featureValues(data, method = "maxint", value = quantitative.method,
                                       intensity = quantitative.method, filled = T))
-
+  
   if("isotopes" %in% colnames(chromPeaks(data))){
     XCMISP <- as.data.frame(featureValues(data, method = "maxint", value = "isotopes",
                                           intensity = quantitative.method, filled = T))
@@ -774,7 +774,7 @@ peak.alignment <- function(data, bw = 5, minfrac = 0.5, mzwid = 0.015,
     for(i in 1:nrow(XCMISP)){
       XCMISP$isotopePercent[i] <- sum(XCMISP[i,-ncol(XCMISP)] == 0) / (ncol(XCMISP) - 1)
     }
-
+    
     XCMADD <- as.data.frame(featureValues(data, method = "maxint", value = "adduct",
                                           intensity = quantitative.method, filled = T))
     XCMADD <- cbind(XCMADD, 0)
@@ -783,24 +783,24 @@ peak.alignment <- function(data, bw = 5, minfrac = 0.5, mzwid = 0.015,
     for(i in 1:nrow(XCMADD)){
       XCMADD$adductPercentage[i] <- sum(XCMADD[i,-ncol(XCMADD)] == 0) / (ncol(XCMADD) - 1)
     }
-
+    
     XCMPCG <- as.data.frame(featureValues(data, method = "maxint", value = "pcgroup",
                                           intensity = quantitative.method, filled = T))
     colnames(XCMPCG) <- paste0(colnames(XCMPCG), "_pcgroup")
-
+    
     XCMt <- as.data.frame(featureDefinitions(data))
     featureTable <- cbind(XCMt$mzmed, XCMt$rtmed, XCMt$rtmin, XCMt$rtmax, XCMI,
                           XCMISP$isotopePercent, XCMADD$adductPercentage, XCMPCG)
     colnames(featureTable)[1:4] <- c("mz", "rt", "rtmin", "rtmax")
     colnames(featureTable)[(5+ncol(XCMPCG)):(6+ncol(XCMPCG))] <- c("isotopePercent", "adductPercentage")
-
+    
   }else{
     XCMt <- as.data.frame(featureDefinitions(data))
     featureTable <- cbind(XCMt$mzmed, XCMt$rtmed, XCMt$rtmin, XCMt$rtmax, XCMI)
     colnames(featureTable)[1:4] <- c("mz", "rt", "rtmin", "rtmax")
   }
-
-
+  
+  
   #Output
   featureTable <- as.data.frame(featureTable)
   featureTable <- featureTable[order(featureTable$mz, decreasing = F ),]
@@ -815,7 +815,7 @@ ms2.tofeaturetable <- function(data, featureTable, rt.tol = 30, mz.tol = 0.01){
   featureTable <- cbind(featureTable,F,0,0,0,0)
   colnames(featureTable)[(ncol(featureTable)-4):ncol(featureTable)] <- c("MS2_match", "MS2mz", "MS2int",
                                                                          "PeaksCount", "fromFile")
-
+  
   for (i in 1:nrow(featureTable)) {
     if(!is.null(MS2spectra[[i]])){
       tmpSpectra <- MS2spectra[[i]]
@@ -884,58 +884,58 @@ feature.annotation <- function(featureTable, lib_directory, lib_name, dp = 0.7, 
     return  <- c(score,match_No)
     return(return)
   }
-
+  
   # Calculate the number of cores
   no_cores <- detectCores() - 1
   # print("Using cores:")
   # print(no_cores)
   # Initiate cluster
   registerDoParallel(no_cores)
-
+  
   setwd(lib_directory)
   database <- read.msp(lib_name, only.org = FALSE)
   featureTable <- cbind(featureTable, 0)
   colnames(featureTable)[ncol(featureTable)] <- "Annotation"
   featureTable <- cbind(featureTable, 0)
   colnames(featureTable)[ncol(featureTable)] <- "DPscore"
-
+  
   rez <- foreach(x = 1:nrow(featureTable)) %dopar% {
     premass.Q <- featureTable$mz[x]     ###query precursor ion mass
-
+    
     if(featureTable$MS2mz[x] == 0){
       # featureTable$Annotation[x] <- "unknown"
       return(c("unknown", 0))
     }
-
+    
     ms2.Q <- data.frame(m.z = strsplit(featureTable$MS2mz[x], ";")[[1]],
                         int = strsplit(featureTable$MS2int[x], ";")[[1]])  ###query ms2 input, ncol = 2, m.z & int
     ms2.Q$m.z <- as.numeric(as.character(ms2.Q$m.z))
     ms2.Q$int <- as.numeric(as.character(ms2.Q$int))
-
+    
     output <- data.frame(matrix(ncol=3))
     colnames(output) <- c('std.name','DP.score','match_No')
     h <- 1
     for(i in 1:length(database)){
       if(is.null(database[[i]]$PrecursorMZ)==TRUE) next # no precursor mass
-
+      
       premass.L <- database[[i]]$PrecursorMZ # database precursor
       if(abs(premass.L-premass.Q) > ms1.tol) next # precursor filter
-
+      
       ms2.L <- as.data.frame(database[[i]]$pspectrum) # database spectrum
       name.L <- database[[i]]$Name
-
+      
       output[h,1] <- name.L
       output[h,2] <- dp.score(ms2.Q,ms2.L)[1]
       output[h,3] <- dp.score(ms2.Q,ms2.L)[2]
-
+      
       h <- h + 1
     }
     output <- output[complete.cases(output),]
-
+    
     # Dp score threshold, Dp score >= 0.7 , match_No >= 6 (used in GNPS identification)
     output <- output[output[,2] >= dp,]
     # output <- output[output[,3] >= match.number.threshold,]
-
+    
     if(nrow(output)==0) {
       # featureTable$Annotation[x] <- "unknown"
       return(c("unknown", 0))
@@ -946,14 +946,14 @@ feature.annotation <- function(featureTable, lib_directory, lib_name, dp = 0.7, 
       return(c(output[1,1], output[1,2]))
     }
   }
-
+  
   for(x in 1:nrow(featureTable)){
     featureTable[x, c("Annotation", "DPscore")] <- rez[[x]]
   }
   featureTable$DPscore <- as.numeric(featureTable$DPscore)
   #clean up the cluster
   stopImplicitCluster()
-
+  
   return(featureTable)
 }
 
@@ -980,10 +980,10 @@ plot.features <- function(dir, featureTable, data, plot.type, plotmz.tol = 0.01,
       return(y)
     }
   }
-
+  
   input.files <- gsub("\\", "/", data@processingData@files, fixed=TRUE)
   setwd(dir)
-
+  
   if(plot.type == 1 | plot.type == 2 | plot.type == 3 | plot.type == "target"){
     xraw <- xcmsRaw(input.files[1],profstep=0, mslevel = 1)
     dir.create(paste0("level_", plot.type))
@@ -1022,7 +1022,7 @@ plot.features <- function(dir, featureTable, data, plot.type, plotmz.tol = 0.01,
       mass.lower.limit <- featureTable$mz[k] - plotmz.tol
       mass.upper.limit <- featureTable$mz[k] + plotmz.tol
       maxIndex <- as.numeric(which.max(plot.matrix[k,]))
-
+      
       mzRange <- as.double(cbind(mass.lower.limit, mass.upper.limit))
       RTRange <- as.integer(cbind(rt.lower.limit, rt.upper.limit))
       eeic <- rawEIC(xrawList[[maxIndex]], mzrange=mzRange, rtrange=RTRange) #extracted EIC object
@@ -1036,7 +1036,6 @@ plot.features <- function(dir, featureTable, data, plot.type, plotmz.tol = 0.01,
       dev.off()
     }
   }
-
+  
   setwd(dir)
 }
-
