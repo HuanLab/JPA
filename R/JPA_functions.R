@@ -334,7 +334,7 @@ find.level3features <- function(data, mz.tol = 10, mass.tol = 0.05, rt.tol = 60,
         }
       }
       level3.matrix <- level3.matrix[is.na(level3.matrix$mz)==FALSE,]
-      level3.matrix <- level3.matrix[order(level3.matrix$int, decreasing = T ),]
+      level3.matrix <- level3.matrix[order(level3.matrix$maxo, decreasing = T ),]
       
       # Dereplication of level 3 features
       dereplicate.level3 <- data.frame(matrix(ncol = ncol(level3.matrix), nrow = 1))
@@ -436,7 +436,7 @@ find.level3features <- function(data, mz.tol = 10, mass.tol = 0.05, rt.tol = 60,
         }
       }
       level3.matrix <- level3.matrix[is.na(level3.matrix$mz)==FALSE,]
-      level3.matrix <- level3.matrix[order(level3.matrix$int, decreasing = T ),]
+      level3.matrix <- level3.matrix[order(level3.matrix$maxo, decreasing = T ),]
       
       # Dereplication of level 3 features
       dereplicate.level3 <- data.frame(matrix(ncol = ncol(level3.matrix), nrow = 1))
