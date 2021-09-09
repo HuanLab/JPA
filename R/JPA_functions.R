@@ -267,7 +267,7 @@ custom.featureTable <- function(dir, FTdir, mz.tol = 10){
 }
 
 #Add additional level 3 features to featureTable
-find.level3features <- function(data, mz.tol = 10, mass.tol = 0.05, rt.tol = 60, derep.mass.tol = 0.01, derep.rt.tol = 30
+find.level3features <- function(data, mz.tol = 10, mass.tol = 0.05, rt.tol = 60, derep.mass.tol = 0.01, derep.rt.tol = 30,
                                 level3.threshold = 2){
   
   # Calculate the number of cores
