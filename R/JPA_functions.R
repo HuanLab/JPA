@@ -358,6 +358,8 @@ find.level3features <- function(data, mz.tol = 10, mass.tol = 0.05, rt.tol = 60,
             TempInt <- eic.matrixFront[x]
             if(putative.level3$int[j] > TempInt) break
             putative.level3$int[j] <- TempInt
+            RTindex <- eeicBehind[["scan"]][x+1]
+            putative.level3$rt[j] <- xraw@scantime[RTindex]
           } 
         }
         eeic <- rawEIC(xraw, mzrange=mzRange, rtrange=RTRange)
