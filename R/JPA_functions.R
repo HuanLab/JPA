@@ -285,34 +285,81 @@ find.level3features <- function(data, mz.tol = 10, mass.tol = 0.05, rt.tol = 60,
                                               data@featureData@data$basePeakIntensity > 0,c(10, 18, 20)]
     colnames(premass.matrix) <- c("rt", "mz", "int")
     
-    is.level12 <- logical(length = nrow(premass.matrix))
-    for(i in 1:nrow(premass.matrix)){
-      mass.lower.limit <- premass.matrix$mz[i] * (1 - mz.tol * 1e-6)
-      mass.upper.limit <- premass.matrix$mz[i] * (1 + mz.tol * 1e-6)
+    # Dereplication of premass
+    premass.matrix <- premass.matrix[order(premass.matrix$int, decreasing = T ),]
+    dereplicate.level3 <- data.frame(matrix(ncol = ncol(premass.matrix), nrow = 1))
+    colnames(dereplicate.level3) <- colnames(premass.matrix)
+    for(q in 1:nrow(premass.matrix)){
+      mass.lower.limit <- premass.matrix$mz[q] - derep.mass.tol
+      mass.upper.limit <- premass.matrix$mz[q] + derep.mass.tol
+      rt.lower.limit <- premass.matrix$rt[q] - derep.rt.tol
+      rt.upper.limit <- premass.matrix$rt[q] + derep.rt.tol
+      temp <- dereplicate.level3[(dereplicate.level3$mz >= mass.lower.limit &
+                                    dereplicate.level3$mz <= mass.upper.limit &
+                                    dereplicate.level3$rt >= rt.lower.limit &
+                                    dereplicate.level3$rt <= rt.upper.limit),]
+      temp <- temp[complete.cases(temp),]
+      if(nrow(temp) == 0) {
+        dereplicate.level3 <- rbind(dereplicate.level3, premass.matrix[q,])
+      }
+    }
+    dereplicate.level3 <- dereplicate.level3[complete.cases(dereplicate.level3),]
+    
+    # Confirm level 3 features
+    is.level12 <- logical(length = nrow(dereplicate.level3))
+    for(i in 1:nrow(dereplicate.level3)){
+      mass.lower.limit <- dereplicate.level3$mz[i] * (1 - mz.tol * 1e-6)
+      mass.upper.limit <- dereplicate.level3$mz[i] * (1 + mz.tol * 1e-6)
       tmpFT <- as.data.frame(chromPeaks(data))
       short.list <- tmpFT[tmpFT$mz >= mass.lower.limit & tmpFT$mz <= mass.upper.limit,]
-      short.list <- short.list[short.list$rtmin <= premass.matrix$rt[i] & short.list$rtmax >= premass.matrix$rt[i],]
+      short.list <- short.list[short.list$rtmin <= dereplicate.level3$rt[i] & short.list$rtmax >= dereplicate.level3$rt[i],]
       if(nrow (short.list) > 0){
         is.level12[i] <- TRUE
       }
     }
     xraw <- xcmsRaw(input.files[1],profstep=0, mslevel = 1)
+    putative.level3 <- dereplicate.level3[is.level12 == FALSE,]
     
-    # Confirm level 3 features
-    putative.level3 <- premass.matrix[is.level12 == FALSE,]
+    FT <- data.frame(matrix(ncol = ncol(putative.level3), nrow = nrow(putative.level3)))
+    colnames(FT) <- colnames(putative.level3)
+    FT <- putative.level3
+    
     level3.matrix <- data.frame(matrix(nrow = nrow(putative.level3), ncol = ncol(tmpFT)))
     colnames(level3.matrix) <- colnames(tmpFT)
     if(nrow(putative.level3 != 0)){
       for (j in 1:nrow(putative.level3)){
         if(putative.level3$mz[j] > xraw@mzrange[2] | putative.level3$mz[j] < xraw@mzrange[1]) next
-        if(putative.level3$rt[j] > tail(xraw@scantime, n=1) | putative.level3$rt[j] < xraw@scantime[1]) next
+        if(putative.level3$rt[j] > tail(xraw@scantime, n=1) | putative.level3$rt[j] < 2) next
         rt.lower.limit <- putative.level3$rt[j] - rt.tol
         rt.upper.limit <- putative.level3$rt[j] + rt.tol
         mass.lower.limit <- putative.level3$mz[j] - mass.tol
         mass.upper.limit <- putative.level3$mz[j] + mass.tol
-        
         mzRange <- as.double(cbind(mass.lower.limit, mass.upper.limit))
+        RTRangeFront <- as.integer(cbind(rt.lower.limit, putative.level3$rt[j]))
+        RTRangeBehind <- as.integer(cbind(putative.level3$rt[j], rt.upper.limit))
         RTRange <- as.integer(cbind(rt.lower.limit, rt.upper.limit))
+        eeicFront <- rawEIC(xraw, mzrange=mzRange, rtrange=RTRangeFront)
+        eeicBehind <- rawEIC(xraw, mzrange=mzRange, rtrange=RTRangeBehind)
+        eic.matrixFront <- eeicFront[["intensity"]]
+        eic.matrixBehind <- eeicBehind[["intensity"]]
+        ###uphill
+        if(putative.level3$int[j] < eic.matrixBehind[2] & putative.level3$int[j] > eic.matrixFront[length(eic.matrixFront)]){
+          for(x in 2:length(eic.matrixBehind)){
+            TempInt <- eic.matrixBehind[x]
+            if(putative.level3$int[j] > TempInt) break
+            putative.level3$int[j] <- TempInt
+            RTindex <- eeicBehind[["scan"]][x-1]
+            putative.level3$rt[j] <- xraw@scantime[RTindex]
+          }
+        }
+        ###downhill
+        if(putative.level3$int[j] > eic.matrixBehind[2] & putative.level3$int[j] < eic.matrixFront[length(eic.matrixFront)]){
+          for(x in length(eic.matrixFront):1){
+            TempInt <- eic.matrixFront[x]
+            if(putative.level3$int[j] > TempInt) break
+            putative.level3$int[j] <- TempInt
+          } 
+        }
         eeic <- rawEIC(xraw, mzrange=mzRange, rtrange=RTRange)
         eic.matrix <- eeic[["intensity"]]
         avg.int <- (sum(eic.matrix) - putative.level3$int[j]) / (length(eic.matrix) - 1)
@@ -334,28 +381,7 @@ find.level3features <- function(data, mz.tol = 10, mass.tol = 0.05, rt.tol = 60,
         }
       }
       level3.matrix <- level3.matrix[is.na(level3.matrix$mz)==FALSE,]
-      level3.matrix <- level3.matrix[order(level3.matrix$maxo, decreasing = T ),]
-      
-      # Dereplication of level 3 features
-      dereplicate.level3 <- data.frame(matrix(ncol = ncol(level3.matrix), nrow = 1))
-      colnames(dereplicate.level3) <- colnames(level3.matrix)
-      for(q in 1:nrow(level3.matrix)){
-        mass.lower.limit <- level3.matrix$mz[q] - derep.mass.tol
-        mass.upper.limit <- level3.matrix$mz[q] + derep.mass.tol
-        rt.lower.limit <- level3.matrix$rt[q] - derep.rt.tol
-        rt.upper.limit <- level3.matrix$rt[q] + derep.rt.tol
-        temp <- dereplicate.level3[(dereplicate.level3$mz >= mass.lower.limit &
-                                      dereplicate.level3$mz <= mass.upper.limit &
-                                      dereplicate.level3$rt >= rt.lower.limit &
-                                      dereplicate.level3$rt <= rt.upper.limit),]
-        temp <- temp[complete.cases(temp),]
-        if(nrow(temp) == 0) {
-          dereplicate.level3 <- rbind(dereplicate.level3, level3.matrix[q,])
-        }
-      }
-      dereplicate.level3 <- dereplicate.level3[complete.cases(dereplicate.level3),]
     }
-    
   }else{
     width <- floor(log10(length(input.files))) + 1
     featureT <- as.data.frame(chromPeaks(data))
@@ -464,7 +490,7 @@ find.level3features <- function(data, mz.tol = 10, mass.tol = 0.05, rt.tol = 60,
   #clean up the cluster
   stopImplicitCluster()
   
-  featureTable <- rbind(chromPeaks(data), as.matrix(dereplicate.level3))
+  featureTable <- rbind(chromPeaks(data), as.matrix(level3.matrix))
   featureTable <- as.data.frame(featureTable)
   featureTable <- featureTable[order(featureTable$mz, decreasing = F ),]
   digits <- floor(log10(nrow(featureTable))) + 1
