@@ -335,6 +335,8 @@ find.level3features <- function(data, mz.tol = 10, mass.tol = 0.01, rt.tol = 60,
         RTRange <- as.integer(cbind(rt.lower.limit, rt.upper.limit))
         eeicFront <- rawEIC(xraw, mzrange=mzRange, rtrange=RTRangeFront)
         eeicBehind <- rawEIC(xraw, mzrange=mzRange, rtrange=RTRangeBehind)
+        eic.matrixFront <- eeicFront[["intensity"]]
+        eic.matrixBehind <- eeicBehind[["intensity"]]
         RTIndex <- max(which(xraw@scantime < putative.level3$rt[j]))
         premassRT <- xraw@scantime[RTIndex]
         if(premassRT > as.integer(putative.level3$rt[j])){
@@ -490,26 +492,26 @@ find.level3features <- function(data, mz.tol = 10, mass.tol = 0.01, rt.tol = 60,
           RTIndex <- max(which(xraw@scantime < putative.level3$rt[j]))
           premassRT <- xraw@scantime[RTIndex]
           if(premassRT > as.integer(putative.level3$rt[j])){
-           ###uphill
-           if(putative.level3$int[j] < eic.matrixBehind[2] & putative.level3$int[j] > eic.matrixFront[length(eic.matrixFront)]){
-            for(x in 2:length(eic.matrixBehind)){
-              TempInt <- eic.matrixBehind[x]
-              if(putative.level3$int[j] > TempInt) break
-              putative.level3$int[j] <- TempInt
-              RTindex <- eeicBehind[["scan"]][x]
-              putative.level3$rt[j] <- xraw@scantime[RTindex]
+            ###uphill
+            if(putative.level3$int[j] < eic.matrixBehind[2] & putative.level3$int[j] > eic.matrixFront[length(eic.matrixFront)]){
+              for(x in 2:length(eic.matrixBehind)){
+                TempInt <- eic.matrixBehind[x]
+                if(putative.level3$int[j] > TempInt) break
+                putative.level3$int[j] <- TempInt
+                RTindex <- eeicBehind[["scan"]][x]
+                putative.level3$rt[j] <- xraw@scantime[RTindex]
+              }
             }
-          }
-           ###downhill
-           if(putative.level3$int[j] > eic.matrixBehind[2] & putative.level3$int[j] < eic.matrixFront[length(eic.matrixFront)]){
-            for(x in length(eic.matrixFront):1){
-              TempInt <- eic.matrixFront[x]
-              if(putative.level3$int[j] > TempInt) break
-              putative.level3$int[j] <- TempInt
-              RTindex <- eeicFront[["scan"]][x]
-              putative.level3$rt[j] <- xraw@scantime[RTindex]
-            } 
-           }
+            ###downhill
+            if(putative.level3$int[j] > eic.matrixBehind[2] & putative.level3$int[j] < eic.matrixFront[length(eic.matrixFront)]){
+              for(x in length(eic.matrixFront):1){
+                TempInt <- eic.matrixFront[x]
+                if(putative.level3$int[j] > TempInt) break
+                putative.level3$int[j] <- TempInt
+                RTindex <- eeicFront[["scan"]][x]
+                putative.level3$rt[j] <- xraw@scantime[RTindex]
+              } 
+            }
           }
           if(premassRT <= as.integer(putative.level3$rt[j])){
             ###uphill
