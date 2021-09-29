@@ -1,4 +1,5 @@
 #noise average and sd estimation#
+#Please prepare the raw files in mzXML in a folder for the estimation. The location of the folder should be assigned to the direcotory. 
 directory <- "F:/Jian_Guo"
 setwd(directory)
 filename <- list.files(pattern = ".mzXML")
