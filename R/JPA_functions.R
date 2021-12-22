@@ -386,7 +386,7 @@ find.level3features <- function(data, mz.tol = 10, mass.tol = 0.01, rt.tol = 60,
         eeic <- rawEIC(xraw, mzrange=mzRange, rtrange=RTRange)
         eic.matrix <- eeic[["intensity"]]
         avg.int <- (sum(eic.matrix) - putative.level3$int[j]) / (length(eic.matrix) - 1)
-        if(is.na(avg.int)) next
+        if(is.na(avg.int) || length(eic.matrix) < 4) next
         if(putative.level3$int[j] >= level3.threshold * avg.int){
           #Put level 3 features in featureTable
           level3.matrix[j,1]  <- putative.level3$mz[j]
@@ -538,7 +538,7 @@ find.level3features <- function(data, mz.tol = 10, mass.tol = 0.01, rt.tol = 60,
           eeic <- rawEIC(xraw, mzrange=mzRange, rtrange=RTRange)
           eic.matrix <- eeic[["intensity"]]
           avg.int <- (sum(eic.matrix) - putative.level3$int[j]) / (length(eic.matrix) - 1)
-          if(is.na(avg.int)) next
+          if(is.na(avg.int) || length(eic.matrix) < 4) next
           if(putative.level3$int[j] >= level3.threshold * avg.int){
             #Put level 3 features in featureTable
             is.level3 <- TRUE
