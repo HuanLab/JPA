@@ -18,7 +18,7 @@ Jian Guo, Sam Shen, Tao Huan
 
 # Part 1: Introduction and installation
 
-`JPA` is a comprehensive and integrated metabolomics data processing software. It extract both Gaussian and non-Gaussian shaped metabolic features. It also performs sample alignment, adduct and metabolite annotations. 'JPA' is written in R and its source code is publicly available at <https://github.com/HuanLab/JPA.git>.
+`JPA` is a comprehensive and integrated metabolomics data processing software. It extract both Gaussian and non-Gaussian shaped metabolic features. It also performs sample alignment, adduct and metabolite annotations. 'JPA' is written in R and its source code is publicly available at <https://github.com/HuanLab/JPA.git>. User can refer to the folder "example" for various types of untargeted metabolomics data processing. The demo data files are available in the folder "Demo data" for users to try different functions. 
 
 To install `JPA` package R version 4.0.0 or above is required, and we
 recommend using RStudio to complete the installation and usage of
