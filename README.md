@@ -140,7 +140,7 @@ head(featureTable)
     ## F5 44.99868 1274.340 1201.896 1290.801 80583.88      1    PP
     ## F6 44.99868 1274.340 1201.896 1290.801 80583.88      1    PP
 
-# Part 3: MS2 recognition Feature Identification
+# Part 3: MS2 Recognition-Based Feature Identification
 
 Please do not use this function when processing full-scan or DIA data set!
 After PP features have been extracted, MR feature
@@ -152,7 +152,7 @@ The threshold used for determining whether the rescued features are true positiv
 featureTable <- find.level3features(data = MSdata, level3.threshold = 2)
 ```
 
-# Part 4: Add Target Features
+# Part 4: Add Target Feature List
 
 After extracting all PP and MR features, users may also want to
 extract features from an in-house library of standard metabolites with
