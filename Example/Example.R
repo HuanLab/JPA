@@ -1,16 +1,16 @@
 library(IPA)
 # Example workflow scripts
 #########################################################################################
-# Workflow 1: XCMS -> level3 -> alignment -> plot -> annotation
-# Single
+# Workflow 1: JPA-PP(centWave) -> JPA-MR -> alignment -> plot -> annotation
+# Single file
 dir = "X:/Users/IPAtest_20210330/singleDDA"
 # Extract JPA-PP fetures 
 featureTable <- XCMS.featureTable(dir = dir, mz.tol = 10, ppm=10, peakwidth=c(5,20), mzdiff = 0.01,
                              snthresh = 6, integrate = 1, prefilter = c(3,100), noise = 100)
 # Extract JPA-MR fetures
-featureTable <- find.level3features(data = MSdata)
+featureTable <- find.level3features(data = MSdata, level3.threshold = 2)
 
-# Multi
+# Multi files
 dir = "X:/Users/IPAtest_20210330/multiDDA"
 # Extract JPA-PP fetures
 featureTable <- XCMS.featureTable(dir = dir, mz.tol = 10, ppm=10, peakwidth=c(5,20), mzdiff = 0.01,
@@ -20,7 +20,7 @@ featureTable <- find.level3features(data = MSdata)
 featureTable <- peak.alignment(data = MSdata, bw = 5, minfrac = 0.5, mzwid = 0.015,
                                minsamp = 1, max = 100, quantitative.method = "maxo")
 #########################################################################################
-# Workflow 2: XCMS -> level3 -> target -> alignment -> plot -> annotation
+# Workflow 2: JPA-PP(centWave) -> JPA-MR -> JPA-TL -> alignment -> plot -> annotation
 # Single
 dir = "X:/Users/IPAtest_20210330/singleDDA"
 tarFTdir = "X:/Users/IPAtest_20210330"
@@ -49,7 +49,7 @@ featureTable <- adduct.isotope.annotation(data = MSdata, polarity = "negative")
 featureTable <- peak.alignment(data = MSdata, bw = 5, minfrac = 0.5, mzwid = 0.015,
                                minsamp = 1, max = 100, quantitative.method = "maxo")
 #########################################################################################
-# Workflow 3: Existing Feature table -> level3 -> alignment -> plot -> annotation
+# Workflow 3: Existing Feature table -> JPA-MR -> alignment -> plot -> annotation
 # Single
 dir = "X:/Users/IPAtest_20210330/singleDDA"
 FTdir = "X:/Users/IPAtest_20210330/singleDDA"
@@ -68,7 +68,7 @@ featureTable <- find.level3features(data = MSdata)
 featureTable <- peak.alignment(data = MSdata, bw = 5, minfrac = 0.5, mzwid = 0.015,
                                minsamp = 1, max = 100, quantitative.method = "maxo")
 #########################################################################################
-# Workflow 4: Existing Feature table -> level3 -> target -> alignment -> plot -> annotation
+# Workflow 4: Existing Feature table -> JPA-MR -> JPA-TL -> alignment -> plot -> annotation
 # Single
 dir = "X:/Users/IPAtest_20210330/singleDDA"
 FTdir = "X:/Users/IPAtest_20210330/singleDDA"
