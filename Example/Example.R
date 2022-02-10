@@ -1,4 +1,4 @@
-library(IPA)
+library(JPA)
 # Example workflow scripts
 #########################################################################################
 # Workflow 1: JPA-PP(centWave) -> JPA-MR -> alignment -> plot -> annotation
