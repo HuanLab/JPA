@@ -36,7 +36,7 @@ matchMS2 <- function(x,featuretable, rt.tol = 0, mz.tol = 0) {
 }
 
 #XCMS Feature Extraction
-XCMS.featureTable <- function(dir, mz.tol = 10, ppm=10, peakwidth=c(5,20), mzdiff = 0.01, snthresh = 6, integrate = 1,
+XCMS.featureTable <- function(dir, mz.tol = 50, ppm=50, peakwidth=c(5,20), mzdiff = 0.01, snthresh = 6, integrate = 1,
                               prefilter = c(3,100), noise = 100){
   #XCMS feature detection
   cwp <- CentWaveParam(ppm = ppm,
@@ -141,7 +141,7 @@ custom.featureTable <- function(dir, FTdir, mz.tol = 10){
   registerDoParallel(no_cores)
   
   setwd(dir)
-  cwp <- CentWaveParam(ppm = 10,
+  cwp <- CentWaveParam(ppm = 50,
                        peakwidth = c(5,20),
                        mzdiff = 0.01,
                        snthresh = 6,
@@ -267,7 +267,7 @@ custom.featureTable <- function(dir, FTdir, mz.tol = 10){
 }
 
 #Add additional level 3 features to featureTable
-find.level3features <- function(data, mz.tol = 10, mass.tol = 0.01, rt.tol = 60, derep.mass.tol = 0.01, derep.rt.tol = 30,
+find.level3features <- function(data, mz.tol = 50, mass.tol = 0.01, rt.tol = 60, derep.mass.tol = 0.01, derep.rt.tol = 30,
                                 level3.threshold = 2){
   
   # Calculate the number of cores
@@ -773,7 +773,7 @@ adduct.isotope.annotation <- function(data, polarity){
       FT <- featureTable[featureTable$sample == n, ]
       currData <- readMSData(input.files[n], centroided = TRUE, mode = "onDisk")
       #PICK LEVEL 1 AND 2 FEATURES
-      cwp <- CentWaveParam(ppm = 10,
+      cwp <- CentWaveParam(ppm = 50,
                            peakwidth = c(5,20),
                            mzdiff = 0.01,
                            snthresh = 6,
