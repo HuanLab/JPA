@@ -55,7 +55,7 @@ XCMS.featureTable <- function(dir, mz.tol = 10, ppm=10, peakwidth=c(5,20), mzdif
   registerDoParallel(no_cores)
   
   setwd(dir)
-  input.files <- list.files(pattern = ".mzXML")
+  input.files <- list.files(pattern = ".mzXML|.mzML")
   data <- readMSData(input.files, centroided = TRUE, mode = "onDisk")
   #PICK LEVEL 1 AND 2 FEATURES
   data <- findChromPeaks(data, param = cwp)
@@ -148,7 +148,7 @@ custom.featureTable <- function(dir, FTdir, mz.tol = 10){
                        integrate = 1,
                        prefilter = c(3,100),
                        noise = 100)
-  input.files <- list.files(pattern = ".mzXML")
+  input.files <- list.files(pattern = ".mzXML|.mzML")
   data <- readMSData(input.files, centroided = TRUE, mode = "onDisk")
   #PICK LEVEL 1 AND 2 FEATURES
   data <- findChromPeaks(data, param = cwp)
